@@ -1,6 +1,6 @@
 use object::History;
 use std::collections::HashMap;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{self, prelude::*, BufReader};
 mod object;
 mod util;
@@ -15,7 +15,7 @@ fn main() -> io::Result<()> {
 
     let json_string = serde_json::to_string(&history)?;
 
-    println!("{json_string:?}");
+    fs::write("./occupancy.json", json_string).expect("Unable to write file");
 
     Ok(())
 }

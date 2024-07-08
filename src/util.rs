@@ -26,7 +26,6 @@ pub fn process_line(
 
         let event_type = event.get("type").unwrap().as_str().unwrap();
         let link_event = LinkEvent {
-            query: one_line_query.clone(),
             link: event.get("link").unwrap().as_object().unwrap().clone(),
             queue: event.get("queue").unwrap().as_object().unwrap().clone(),
         };

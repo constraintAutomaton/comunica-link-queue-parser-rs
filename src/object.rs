@@ -10,6 +10,5 @@ pub struct History {
 #[derive(Debug, Serialize)]
 pub struct LinkEvent {
     pub link: Map<String, serde_json::Value>,
-    pub query: String,
     pub queue: Map<String, serde_json::Value>,
 }
