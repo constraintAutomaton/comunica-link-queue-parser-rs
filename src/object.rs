@@ -4,8 +4,8 @@ use std::vec::Vec;
 
 #[derive(Debug, Serialize, PartialEq)]
 pub struct History {
-    pub push_events: Vec<LinkEvent>,
-    pub pop_events: Vec<LinkEvent>,
+    pub push: Vec<LinkEvent>,
+    pub pop: Vec<LinkEvent>,
 }
 #[derive(Debug, Serialize, PartialEq)]
 pub struct LinkEvent {
