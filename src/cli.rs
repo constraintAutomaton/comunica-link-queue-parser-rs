@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-/// The CLI arguments
+/// A small CLI tool to parse the occupancy of the link queue of the comunica link traversal query engine
 pub(crate) struct Cli {
     /// Path of logging file of comunica
     /// By default the value is [default: ./info]
