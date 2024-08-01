@@ -10,7 +10,25 @@ A small CLI tool to parse the occupancy of the link queue of the [comunica link 
 ```bash
 cargo build --release
 ```
+
+## Usage
+The binary is located at `./target/release/comunica-link-queue-parser-rs` and can be executed.
+
+```
+A small CLI tool to parse the occupancy of the link queue of the comunica link traversal query engine
+
+Usage: comunica-link-queue-parser-rs [OPTIONS]
+
+Options:
+  -i, --input <INPUT>    Path of logging file of comunica By default the value is [default: ./info]
+  -o, --output <OUTPUT>  Path of the output occupancy file By default the value is [default: ./occupancy.json]
+  -p, --print            Print the occupancy object [default: false]
+  -h, --help             Print help
+  -V, --version          Print version
+```
+
 ## Example output
+
 ```json
 {
     "SELECT ?messageId ?messageCreationDate ?messageContent WHERE {\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/hasCreator> <https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card#me>.\\n  ?message <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/Post>.\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/content> ?messageContent.\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/creationDate> ?messageCreationDate.\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/id> ?messageId.\\n}": {
@@ -176,19 +194,4 @@ cargo build --release
         ]
     }
 }
-```
-## Usage
-The binary is located at `./target/release/comunica-link-queue-parser-rs` and can be executed.
-
-```
-A small CLI tool to parse the occupancy of the link queue of the comunica link traversal query engine
-
-Usage: comunica-link-queue-parser-rs [OPTIONS]
-
-Options:
-  -i, --input <INPUT>    Path of logging file of comunica By default the value is [default: ./info]
-  -o, --output <OUTPUT>  Path of the output occupancy file By default the value is [default: ./occupancy.json]
-  -p, --print            Print the occupancy object [default: false]
-  -h, --help             Print help
-  -V, --version          Print version
 ```
