@@ -26,8 +26,25 @@ Options:
   -h, --help             Print help
   -V, --version          Print version
 ```
+## Example run
 
-## Example output
+- Compile the code (see the [installation section](#installation))
+
+- Run a query using [Comunica feature link traversal](https://github.com/comunica/comunica-feature-link-traversal) with the [Comunica Wrapper Info Occupancy RDF Resolve Hypermedia Links Queue Actor](https://github.com/comunica/comunica-feature-link-traversal/tree/master/packages/actor-rdf-resolve-hypermedia-links-queue-wrapper-info-occupancy) and a [`@comunica/logger-bunyan`](https://github.com/comunica/comunica/tree/master/packages/logger-bunyan) and pipe the log into a file. The resulting file should look like the example below but much longer.
+
+```json
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":17725,"level":30,"headers":{"accept":"application/n-quads,application/trig;q=0.95,application/ld+json;q=0.9,application/n-triples;q=0.8,text/turtle;q=0.6,application/rdf+xml;q=0.5,text/n3;q=0.35,application/xml;q=0.3,image/svg+xml;q=0.3,text/xml;q=0.3,text/html;q=0.2,application/xhtml+xml;q=0.18,application/json;q=0.135,text/shaclc;q=0.1,text/shaclc-ext;q=0.05","user-agent":"Comunica/actor-http-fetch (Node.js v20.13.1; linux)"},"method":"GET","actor":"urn:comunica:default:http/actors#fetch","msg":"Requesting https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card","time":"2024-07-05T12:06:08.501Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":17725,"level":30,"actor":"urn:comunica:default:query-source-identify-hypermedia/actors#none","msg":"Identified as file source: https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card","time":"2024-07-05T12:06:08.624Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":17725,"level":10,"data":{"type":"pushEvent","link":{"url":"https://solidbench.linkeddatafragments.org/pods/00000000000000000933/","producedByActor":{"name":"urn:comunica:default:extract-links/actors#predicates-solid","metadata":{"predicates":["http://www.w3.org/ns/pim/space#storage"],"matchingPredicate":"http://www.w3.org/ns/pim/space#storage","checkSubject":true}},"timestamp":2912.4356,"parent":"https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card"},"query":"SELECT ?messageId ?messageCreationDate ?messageContent WHERE {\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/hasCreator> <https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card#me>.\n  ?message <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/Post>.\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/content> ?messageContent.\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/creationDate> ?messageCreationDate.\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/id> ?messageId.\n}","queue":{"size":1,"pushEvents":{"urn:comunica:default:extract-links/actors#predicates-solid":1},"popEvents":{}}},"msg":"Link queue changed","time":"2024-07-05T12:06:08.654Z","v":0}
+```
+
+- Run `comunica-link-queue-parser-rs` (see [usage section](#usage))
+
+```
+./target/release/comunica-link-queue-parser-rs -i "path/to/the/comunica/log" -o "desired/output/path.json"
+```
+
+It should output something similar to the example below.
 
 ```json
 {
