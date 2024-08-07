@@ -100,7 +100,7 @@ where the `./config` is defined as follow.
 - Run `comunica-link-queue-parser-rs` (see [usage section](#usage))
 
 ```
-./target/release/comunica-link-queue-parser-rs -i "path/to/the/comunica/log" -o "desired/output/path.json"
+./target/release/comunica-link-queue-parser-rs -i path/to/the/comunica/log -o desired/output/path.json
 ```
 
 It should output something similar to the shorten example below.
