@@ -30,12 +30,71 @@ Options:
 
 - Compile the code (see the [installation section](#installation))
 
-- Run a query using [Comunica feature link traversal](https://github.com/comunica/comunica-feature-link-traversal) with the [Comunica Wrapper Info Occupancy RDF Resolve Hypermedia Links Queue Actor](https://github.com/comunica/comunica-feature-link-traversal/tree/master/packages/actor-rdf-resolve-hypermedia-links-queue-wrapper-info-occupancy) and a [`@comunica/logger-bunyan`](https://github.com/comunica/comunica/tree/master/packages/logger-bunyan) and pipe the log into a file. The resulting file should look like the example below but much longer.
+- Run a query using [Comunica feature link traversal](https://github.com/comunica/comunica-feature-link-traversal) with the [Comunica Wrapper Info Occupancy RDF Resolve Hypermedia Links Queue Actor](https://github.com/comunica/comunica-feature-link-traversal/tree/master/packages/actor-rdf-resolve-hypermedia-links-queue-wrapper-info-occupancy) and a [`@comunica/logger-bunyan`](https://github.com/comunica/comunica/tree/master/packages/logger-bunyan) and pipe the log into a file.
+
+```js
+import { LoggerBunyan, BunyanStreamProviderStdout } from '@comunica/logger-bunyan';
+import { QueryEngineFactory } from '@comunica/query-sparql-link-traversal-solid';
+
+const query = `
+PREFIX foat: <http://xmlns.com/foaf/0.1/>
+PREFIX ruben: <https://ruben.verborgh.org/profile/#>
+PREFIX rubent: <https://www.rubensworks.net/#>
+SELECT DISTINCT * WHERE {
+    rubent:me foaf:knows ?person.
+    ruben:me foaf:knows ?person.
+    ?person foaf:name ?name.
+}`;
+
+const source = 'https://www.rubensworks.net/';
+const configPath = './config.json';
+const engine = await new QueryEngineFactory().create({ configPath });
+
+const streamProvider = new BunyanStreamProviderStdout({ level: 'trace' });
+const loggerParams = {
+  name: 'comunica',
+  level: 'trace',
+  streamProviders: [ streamProvider ],
+};
+const logger = new LoggerBunyan(loggerParams);
+
+const bindingsStream = await engine.queryBindings(query, {
+  sources:[source],
+  lenient: true,
+  log: logger,
+});
+
+const res = await bindingsStream.toArray();
+```
+where the `./config` is defined as follow.
 
 ```json
-{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":17725,"level":30,"headers":{"accept":"application/n-quads,application/trig;q=0.95,application/ld+json;q=0.9,application/n-triples;q=0.8,text/turtle;q=0.6,application/rdf+xml;q=0.5,text/n3;q=0.35,application/xml;q=0.3,image/svg+xml;q=0.3,text/xml;q=0.3,text/html;q=0.2,application/xhtml+xml;q=0.18,application/json;q=0.135,text/shaclc;q=0.1,text/shaclc-ext;q=0.05","user-agent":"Comunica/actor-http-fetch (Node.js v20.13.1; linux)"},"method":"GET","actor":"urn:comunica:default:http/actors#fetch","msg":"Requesting https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card","time":"2024-07-05T12:06:08.501Z","v":0}
-{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":17725,"level":30,"actor":"urn:comunica:default:query-source-identify-hypermedia/actors#none","msg":"Identified as file source: https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card","time":"2024-07-05T12:06:08.624Z","v":0}
-{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":17725,"level":10,"data":{"type":"pushEvent","link":{"url":"https://solidbench.linkeddatafragments.org/pods/00000000000000000933/","producedByActor":{"name":"urn:comunica:default:extract-links/actors#predicates-solid","metadata":{"predicates":["http://www.w3.org/ns/pim/space#storage"],"matchingPredicate":"http://www.w3.org/ns/pim/space#storage","checkSubject":true}},"timestamp":2912.4356,"parent":"https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card"},"query":"SELECT ?messageId ?messageCreationDate ?messageContent WHERE {\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/hasCreator> <https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card#me>.\n  ?message <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/Post>.\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/content> ?messageContent.\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/creationDate> ?messageCreationDate.\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/id> ?messageId.\n}","queue":{"size":1,"pushEvents":{"urn:comunica:default:extract-links/actors#predicates-solid":1},"popEvents":{}}},"msg":"Link queue changed","time":"2024-07-05T12:06:08.654Z","v":0}
+{
+    "@context": [
+      "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/config-query-sparql/^3.0.0/components/context.jsonld",
+      "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/config-query-sparql-link-traversal/^0.0.0/components/context.jsonld"
+    ],
+    "import": [
+      "ccqslt:config/config-base.json",
+      "ccqslt:config/extract-links/actors/content-policies-conditional.json",
+      "ccqslt:config/extract-links/actors/quad-pattern-query.json",
+      "ccqslt:config/rdf-resolve-hypermedia-links/actors/traverse-replace-conditional.json",
+      "ccqslt:config/rdf-resolve-hypermedia-links-queue/actors/wrapper-limit-count.json",
+      "ccqslt:config/rdf-resolve-hypermedia-links-queue/actors/wrapper-info-occupancy.json"
+    ]
+  }
+  
+```
+
+ The resulting file should look like the example below but much longer.
+
+```json
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":22297,"level":30,"headers":{"accept":"application/n-quads,application/trig;q=0.95,application/ld+json;q=0.9,application/n-triples;q=0.8,text/turtle;q=0.6,application/rdf+xml;q=0.5,text/n3;q=0.35,application/xml;q=0.3,image/svg+xml;q=0.3,text/xml;q=0.3,text/html;q=0.2,application/xhtml+xml;q=0.18,application/json;q=0.135,text/shaclc;q=0.1,text/shaclc-ext;q=0.05","user-agent":"Comunica/actor-http-fetch (Node.js v20.13.1; linux)"},"method":"GET","actor":"urn:comunica:default:http/actors#fetch","msg":"Requesting https://www.rubensworks.net/","time":"2024-08-07T08:21:44.158Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":22297,"level":30,"actor":"urn:comunica:default:query-source-identify-hypermedia/actors#none","msg":"Identified as file source: https://www.rubensworks.net/","time":"2024-08-07T08:21:44.408Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":22297,"level":20,"entries":3,"variables":[["person"],["person"],["person","name"]],"costs":{"inner-bind":2423100.896815718,"inner-multi-smallest":59100},"coefficients":{"inner-bind":{"iterations":0.08968157181571816,"persistedItems":0,"blockingItems":0,"requestTime":24231},"inner-multi-smallest":{"iterations":0,"persistedItems":0,"blockingItems":0,"requestTime":591}},"msg":"Determined physical join operator 'inner-multi-smallest'","time":"2024-08-07T08:21:44.417Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":22297,"level":20,"entries":2,"variables":[["person"],["person"]],"costs":{"inner-hash":40193,"inner-symmetric-hash":40071,"inner-nested-loop":39400,"inner-bind":1221400},"coefficients":{"inner-hash":{"iterations":61,"persistedItems":61,"blockingItems":61,"requestTime":394},"inner-symmetric-hash":{"iterations":61,"persistedItems":61,"blockingItems":0,"requestTime":394},"inner-nested-loop":{"iterations":0,"persistedItems":0,"blockingItems":0,"requestTime":394},"inner-bind":{"iterations":0,"persistedItems":0,"blockingItems":0,"requestTime":12214}},"msg":"Determined physical join operator 'inner-nested-loop'","time":"2024-08-07T08:21:44.418Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":22297,"level":20,"entries":2,"variables":[["person","name"],["person"]],"costs":{"inner-hash":20506,"inner-symmetric-hash":20382,"inner-nested-loop":19700,"inner-bind":19700},"coefficients":{"inner-hash":{"iterations":62,"persistedItems":62,"blockingItems":62,"requestTime":197},"inner-symmetric-hash":{"iterations":62,"persistedItems":62,"blockingItems":0,"requestTime":197},"inner-nested-loop":{"iterations":0,"persistedItems":0,"blockingItems":0,"requestTime":197},"inner-bind":{"iterations":0,"persistedItems":0,"blockingItems":0,"requestTime":197}},"msg":"Determined physical join operator 'inner-nested-loop'","time":"2024-08-07T08:21:44.419Z","v":0}
+{"name":"comunica","streamProviders":[{"level":"trace"}],"hostname":"bryanelliott-latitude5530","pid":22297,"level":10,"data":{"type":"push","link":{"url":"https://data.verborgh.org/people/anastasia_dimou","producedByActor":{"name":"urn:comunica:default:extract-links/actors#quad-pattern-query","metadata":{"onlyVariables":true}},"timestamp":2553.299712,"parent":"https://www.rubensworks.net/"},"query":"SELECT DISTINCT ?name ?person WHERE {\n  <https://www.rubensworks.net/#me> <http://xmlns.com/foaf/0.1/knows> ?person.\n  <https://ruben.verborgh.org/profile/#me> <http://xmlns.com/foaf/0.1/knows> ?person.\n  ?person <http://xmlns.com/foaf/0.1/name> ?name.\n}","queue":{"size":1,"push":{"urn:comunica:default:extract-links/actors#quad-pattern-query":1},"pop":{}}},"msg":"Link queue changed","time":"2024-08-07T08:21:44.426Z","v":0}
 ```
 
 - Run `comunica-link-queue-parser-rs` (see [usage section](#usage))
@@ -44,170 +103,133 @@ Options:
 ./target/release/comunica-link-queue-parser-rs -i "path/to/the/comunica/log" -o "desired/output/path.json"
 ```
 
-It should output something similar to the example below.
+It should output something similar to the shorten example below.
 
 ```json
 {
-    "SELECT ?messageId ?messageCreationDate ?messageContent WHERE {\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/hasCreator> <https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card#me>.\\n  ?message <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/Post>.\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/content> ?messageContent.\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/creationDate> ?messageCreationDate.\\n  ?message <https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/id> ?messageId.\\n}": {
+    "SELECT DISTINCT ?name ?person WHERE {   <https://www.rubensworks.net/#me> <http://xmlns.com/foaf/0.1/knows> ?person.   <https://ruben.verborgh.org/profile/#me> <http://xmlns.com/foaf/0.1/knows> ?person.   ?person <http://xmlns.com/foaf/0.1/name> ?name. }": {
         "push": [
             {
-                "url": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/",
-                "producedByActor": {
-                    "name": "urn:comunica:default:extract-links/actors#predicates-solid",
-                    "metadata": {
-                        "predicates": [
-                            "http://www.w3.org/ns/pim/space#storage"
-                        ],
-                        "matchingPredicate": "http://www.w3.org/ns/pim/space#storage",
-                        "checkSubject": true
-                    }
-                },
-                "timestamp": 1718631765370,
-                "parent": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/card",
-                "queue": {
-                    "size": 1,
-                    "push": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1
+                "link": {
+                    "parent": "https://www.rubensworks.net/",
+                    "producedByActor": {
+                        "metadata": {
+                            "onlyVariables": true
+                        },
+                        "name": "urn:comunica:default:extract-links/actors#quad-pattern-query"
                     },
-                    "pop": {}
+                    "timestamp": 2553.299712,
+                    "url": "https://data.verborgh.org/people/anastasia_dimou"
+                },
+                "queue": {
+                    "pop": {},
+                    "push": {
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 1
+                    },
+                    "size": 1
                 }
             },
             {
-                "url": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/",
-                "producedByActor": {
-                    "name": "urn:comunica:default:extract-links/actors#predicates-ldp",
-                    "metadata": {
-                        "predicates": [
-                            "http://www.w3.org/ns/ldp#contains"
-                        ],
-                        "matchingPredicate": "http://www.w3.org/ns/ldp#contains",
-                        "checkSubject": true
-                    }
-                },
-                "timestamp": 1718631765472,
-                "parent": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/",
-                "queue": {
-                    "size": 1,
-                    "push": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                        "urn:comunica:default:extract-links/actors#predicates-ldp": 1
+                "link": {
+                    "parent": "https://www.rubensworks.net/",
+                    "producedByActor": {
+                        "metadata": {
+                            "onlyVariables": true
+                        },
+                        "name": "urn:comunica:default:extract-links/actors#quad-pattern-query"
                     },
-                    "pop": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1
-                    }
+                    "timestamp": 2553.459799,
+                    "url": "https://data.verborgh.org/people/arne_gevaert"
+                },
+                "queue": {
+                    "pop": {},
+                    "push": {
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 2
+                    },
+                    "size": 2
                 }
             },
             ...
             {
-                "url": "https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/data/forum00000000755914244125",
-                "producedByActor": {
-                  "name": "urn:comunica:default:extract-links/actors#predicates-common",
-                  "metadata": {
-                    "predicates": [
-                      "http://www.w3.org/2000/01/rdf-schema#seeAlso",
-                      "http://www.w3.org/2002/07/owl##sameAs",
-                      "http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
-                    ],
-                    "matchingPredicate": "http://www.w3.org/2000/01/rdf-schema#seeAlso",
-                    "checkSubject": false
-                  }
+                "link": {
+                    "parent": "https://data.verborgh.org/ruben?predicate=http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2Fname&page=14",
+                    "timestamp": 45449.248452,
+                    "url": "https://data.verborgh.org/ruben?predicate=http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2Fname&page=15"
                 },
-                "timestamp": 1718631766440,
-                "parent": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/posts/2011-11-17",
                 "queue": {
-                  "size": 1,
-                  "push": {
-                    "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                    "urn:comunica:default:extract-links/actors#predicates-ldp": 91,
-                    "urn:comunica:default:extract-links/actors#predicates-common": 32
-                  },
-                  "pop": {
-                    "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                    "urn:comunica:default:extract-links/actors#predicates-ldp": 91,
-                    "urn:comunica:default:extract-links/actors#predicates-common": 31
-                  }
+                    "pop": {
+                        "unknown": 15,
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 407
+                    },
+                    "push": {
+                        "unknown": 16,
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 407
+                    },
+                    "size": 1
                 }
-              }
+            }
         ],
         "pop": [
             {
-                "url": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/",
-                "producedByActor": {
-                    "name": "urn:comunica:default:extract-links/actors#predicates-solid",
-                    "metadata": {
-                        "predicates": [
-                            "http://www.w3.org/ns/pim/space#storage"
-                        ],
-                        "matchingPredicate": "http://www.w3.org/ns/pim/space#storage",
-                        "checkSubject": true
-                    }
-                },
-                "timestamp": 1718631765370,
-                "queue": {
-                    "size": 0,
-                    "push": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1
+                "link": {
+                    "producedByActor": {
+                        "metadata": {
+                            "onlyVariables": true
+                        },
+                        "name": "urn:comunica:default:extract-links/actors#quad-pattern-query"
                     },
+                    "timestamp": 2558.003431,
+                    "url": "https://data.verborgh.org/people/anastasia_dimou"
+                },
+                "queue": {
                     "pop": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1
-                    }
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 1
+                    },
+                    "push": {
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 60
+                    },
+                    "size": 59
                 }
             },
             {
-                "url": "https://solidbench.linkeddatafragments.org/pods/00000000000000000933/profile/",
-                "producedByActor": {
-                    "name": "urn:comunica:default:extract-links/actors#predicates-ldp",
-                    "metadata": {
-                        "predicates": [
-                            "http://www.w3.org/ns/ldp#contains"
-                        ],
-                        "matchingPredicate": "http://www.w3.org/ns/ldp#contains",
-                        "checkSubject": true
-                    }
-                },
-                "timestamp": 1718631765473,
-                "queue": {
-                    "size": 4,
-                    "push": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                        "urn:comunica:default:extract-links/actors#predicates-ldp": 5
+                "link": {
+                    "producedByActor": {
+                        "metadata": {
+                            "onlyVariables": true
+                        },
+                        "name": "urn:comunica:default:extract-links/actors#quad-pattern-query"
                     },
+                    "timestamp": 2558.042332,
+                    "url": "https://data.verborgh.org/people/arne_gevaert"
+                },
+                "queue": {
                     "pop": {
-                        "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                        "urn:comunica:default:extract-links/actors#predicates-ldp": 1
-                    }
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 2
+                    },
+                    "push": {
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 60
+                    },
+                    "size": 58
                 }
             },
             ...
             {
-                "url": "https://solidbench.linkeddatafragments.org/www.ldbc.eu/ldbc_socialnet/1.0/data/forum00000000755914244125",
-                "producedByActor": {
-                  "name": "urn:comunica:default:extract-links/actors#predicates-common",
-                  "metadata": {
-                    "predicates": [
-                      "http://www.w3.org/2000/01/rdf-schema#seeAlso",
-                      "http://www.w3.org/2002/07/owl##sameAs",
-                      "http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
-                    ],
-                    "matchingPredicate": "http://www.w3.org/2000/01/rdf-schema#seeAlso",
-                    "checkSubject": false
-                  }
+                "link": {
+                    "timestamp": 45458.530643,
+                    "url": "https://data.verborgh.org/ruben?predicate=http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2Fname&page=15"
                 },
-                "timestamp": 1718631766440,
                 "queue": {
-                  "size": 0,
-                  "push": {
-                    "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                    "urn:comunica:default:extract-links/actors#predicates-ldp": 91,
-                    "urn:comunica:default:extract-links/actors#predicates-common": 32
-                  },
-                  "pop": {
-                    "urn:comunica:default:extract-links/actors#predicates-solid": 1,
-                    "urn:comunica:default:extract-links/actors#predicates-ldp": 91,
-                    "urn:comunica:default:extract-links/actors#predicates-common": 32
-                  }
+                    "pop": {
+                        "unknown": 16,
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 407
+                    },
+                    "push": {
+                        "unknown": 16,
+                        "urn:comunica:default:extract-links/actors#quad-pattern-query": 407
+                    },
+                    "size": 0
                 }
-              }
+            }
         ]
     }
 }
