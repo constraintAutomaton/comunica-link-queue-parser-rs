@@ -26,7 +26,7 @@ Options:
   -h, --help             Print help
   -V, --version          Print version
 ```
-## Example run
+## Example of an execution
 
 - Compile the code (see the [installation section](#installation))
 
